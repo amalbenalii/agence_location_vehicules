@@ -1,0 +1,30 @@
+<!-- Navigation -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4">
+  <div class="container">
+    <a class="navbar-brand" routerLink="/">
+      <i class="bi bi-car-front me-2"></i>
+      Location Véhicules
+    </a>
+
+    <div class="navbar-nav">
+      <a class="nav-link" routerLink="/vehicules" routerLinkActive="active">
+        <i class="bi bi-truck me-1"></i> Véhicules
+      </a>
+      <a class="nav-link" routerLink="/categories" routerLinkActive="active">
+        <i class="bi bi-tags me-1"></i> Catégories
+      </a>
+    </div>
+  </div>
+</nav>
+
+<!-- Contenu principal -->
+<main class="container">
+  <router-outlet></router-outlet>
+</main>
+
+<!-- Pied de page -->
+<footer class="mt-5 py-3 text-center border-top">
+  <div class="container">
+    <span class="text-muted">© 2024 - Gestion de Location de Véhicules</span>
+  </div>
+</footer>

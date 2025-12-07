@@ -1,0 +1,126 @@
+<div class="container">
+  <div class="card">
+    <div class="card-header bg-primary text-white">
+      <h4 class="mb-0">
+        <i class="bi bi-plus-circle me-2"></i>Ajouter un véhicule
+      </h4>
+    </div>
+
+    <div class="card-body">
+      <form (ngSubmit)="onSubmit()">
+        <div class="row">
+          <!-- Marque et Modèle -->
+          <div class="col-md-6 mb-3">
+            <label class="form-label">Marque *</label>
+            <input type="text"
+                   class="form-control"
+                   [(ngModel)]="vehicule.marque"
+                   name="marque"
+                   required>
+          </div>
+
+          <div class="col-md-6 mb-3">
+            <label class="form-label">Modèle *</label>
+            <input type="text"
+                   class="form-control"
+                   [(ngModel)]="vehicule.modele"
+                   name="modele"
+                   required>
+          </div>
+        </div>
+
+        <div class="row">
+          <!-- Immatriculation et Couleur -->
+          <div class="col-md-6 mb-3">
+            <label class="form-label">Immatriculation *</label>
+            <input type="text"
+                   class="form-control"
+                   [(ngModel)]="vehicule.immatriculation"
+                   name="immatriculation"
+                   required>
+          </div>
+
+          <div class="col-md-6 mb-3">
+            <label class="form-label">Couleur</label>
+            <input type="text"
+                   class="form-control"
+                   [(ngModel)]="vehicule.couleur"
+                   name="couleur">
+          </div>
+        </div>
+
+        <div class="row">
+          <!-- Kilométrage et Places -->
+          <div class="col-md-4 mb-3">
+            <label class="form-label">Kilométrage</label>
+            <input type="number"
+                   class="form-control"
+                   [(ngModel)]="vehicule.kilometrage"
+                   name="kilometrage"
+                   min="0">
+          </div>
+
+          <div class="col-md-4 mb-3">
+            <label class="form-label">Nombre de places</label>
+            <input type="number"
+                   class="form-control"
+                   [(ngModel)]="vehicule.nombrePlaces"
+                   name="nombrePlaces"
+                   min="1" max="9">
+          </div>
+
+          <div class="col-md-4 mb-3">
+            <label class="form-label">Statut</label>
+            <select class="form-select" [(ngModel)]="vehicule.statut" name="statut">
+              <option *ngFor="let statut of statuts" [value]="statut">
+                {{ statut }}
+              </option>
+            </select>
+          </div>
+        </div>
+
+        <div class="row">
+          <!-- Carburant et Boîte -->
+          <div class="col-md-6 mb-3">
+            <label class="form-label">Carburant</label>
+            <select class="form-select" [(ngModel)]="vehicule.carburant" name="carburant">
+              <option *ngFor="let carburant of carburants" [value]="carburant">
+                {{ carburant }}
+              </option>
+            </select>
+          </div>
+
+          <div class="col-md-6 mb-3">
+            <label class="form-label">Boîte de vitesse</label>
+            <select class="form-select" [(ngModel)]="vehicule.boiteVitesse" name="boiteVitesse">
+              <option *ngFor="let boite of boitesVitesse" [value]="boite">
+                {{ boite }}
+              </option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Catégorie -->
+        <div class="mb-4">
+          <label class="form-label">Catégorie *</label>
+          <select class="form-select" [(ngModel)]="selectedCategorieId" name="categorie" required>
+            <option [ngValue]="null" disabled>Sélectionnez une catégorie</option>
+            <option *ngFor="let cat of categories" [ngValue]="cat.id">
+              {{ cat.nom }} - {{ cat.prixParJour | currency:'EUR' }}/jour
+            </option>
+          </select>
+        </div>
+
+        <!-- Boutons -->
+        <div class="d-flex justify-content-end gap-2">
+          <button type="button" class="btn btn-secondary" (click)="cancel()">
+            Annuler
+          </button>
+          <button type="submit" class="btn btn-primary" [disabled]="!isFormValid()">
+            Enregistrer
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
