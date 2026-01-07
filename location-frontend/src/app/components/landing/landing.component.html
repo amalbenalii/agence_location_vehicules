@@ -1,0 +1,273 @@
+<app-public-navbar></app-public-navbar>
+
+<!-- Hero Section -->
+<section class="hero-section bg-gradient-primary text-white py-5">
+  <div class="container">
+    <div class="row align-items-center">
+      <div class="col-lg-6">
+        <div class="hero-content">
+          <h1 class="display-4 fw-bold mb-4 animate-fade-in">Trouvez le véhicule parfait pour votre voyage</h1>
+          <p class="lead mb-4 animate-fade-in-delay">Découvrez notre large sélection de véhicules de qualité à des prix compétitifs</p>
+          <div class="d-flex gap-3 animate-fade-in-delay-2">
+            <button class="btn btn-light btn-lg btn-hero" (click)="goToRegister()">
+              <i class="bi bi-person-plus me-2"></i>Commencer
+            </button>
+            <button class="btn btn-outline-light btn-lg btn-hero" (click)="goToLogin()">
+              <i class="bi bi-box-arrow-in-right me-2"></i>Se connecter
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-6 text-center">
+        <div class="hero-image animate-float">
+          <i class="bi bi-car-front"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Section Véhicules -->
+<section id="vehicules" class="py-5 bg-light">
+  <div class="container">
+    <div class="text-center mb-5">
+      <h2 class="display-5 fw-bold mb-3 text-primary">Notre Flotte</h2>
+      <p class="lead text-muted">Choisissez parmi notre sélection de véhicules disponibles</p>
+    </div>
+
+    <!-- Barre de recherche -->
+    <div class="row mb-5">
+      <div class="col-md-8 mx-auto">
+        <div class="search-container">
+          <div class="input-group input-group-lg">
+            <span class="input-group-text bg-primary text-white border-primary">
+              <i class="bi bi-search"></i>
+            </span>
+            <input 
+              type="text" 
+              class="form-control border-primary" 
+              placeholder="Rechercher un véhicule (marque, modèle, immatriculation)..."
+              [(ngModel)]="searchTerm"
+              (input)="onSearch()">
+            <button class="btn btn-primary" type="button">
+              <i class="bi bi-funnel"></i> Filtrer
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Loading -->
+    <div *ngIf="isLoading" class="text-center py-5">
+      <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+        <span class="visually-hidden">Chargement...</span>
+      </div>
+      <p class="mt-3 text-muted">Chargement de notre flotte...</p>
+    </div>
+
+    <!-- Carte vide -->
+    <div *ngIf="!isLoading && filteredVehicules.length === 0" class="text-center py-5">
+      <div class="card border-0 shadow-sm mx-auto" style="max-width: 500px;">
+        <div class="card-body py-5">
+          <i class="bi bi-car-front fs-1 text-secondary d-block mb-3"></i>
+          <h5>Aucun véhicule trouvé</h5>
+          <p class="text-muted">Aucun véhicule ne correspond à votre recherche.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Grille de véhicules -->
+    <div *ngIf="!isLoading && filteredVehicules.length > 0" class="row g-4">
+      <div *ngFor="let vehicule of filteredVehicules; let i = index" class="col-12 col-md-6 col-lg-4">
+        <div class="vehicle-card h-100 shadow-lg border-0" 
+             [style.animation-delay]="(i * 0.1) + 's'"
+             (click)="viewVehiculeDetails(vehicule.id)"
+             (mouseenter)="onCardHover($event, true)"
+             (mouseleave)="onCardHover($event, false)">
+          
+          <!-- Image du véhicule avec overlay -->
+          <div class="vehicle-image-container position-relative overflow-hidden">
+            <div *ngIf="vehicule.imageUrl" 
+                 class="vehicle-image w-100 h-100" 
+                 [style.background-image]="'url(http://localhost:8090' + vehicule.imageUrl + ')'">
+              <!-- Overlay gradient -->
+              <div class="vehicle-overlay-gradient"></div>
+              
+              <!-- Actions overlay -->
+              <div class="vehicle-actions-overlay">
+                <div class="d-flex gap-2">
+                  <button class="btn btn-light btn-sm action-btn" (click)="viewVehiculeDetails(vehicule.id); $event.stopPropagation()">
+                    <i class="bi bi-eye me-1"></i>Détails
+                  </button>
+                  <button class="btn btn-primary btn-sm action-btn" (click)="quickReserve(vehicule.id); $event.stopPropagation()">
+                    <i class="bi bi-calendar-check me-1"></i>Réserver
+                  </button>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Fallback pour les véhicules sans image -->
+            <div *ngIf="!vehicule.imageUrl" 
+                 class="vehicle-image bg-gradient-secondary w-100 h-100 d-flex align-items-center justify-content-center">
+              <div class="text-center text-white">
+                <i class="bi bi-car-front" style="font-size: 4rem;"></i>
+                <p class="mb-0 mt-2 small">{{ vehicule.marque }} {{ vehicule.modele }}</p>
+              </div>
+            </div>
+            
+            <!-- Badge de statut premium -->
+            <div class="vehicle-status-top">
+              <span class="badge bg-success status-badge animate-pulse">
+                <i class="bi bi-check-circle me-1"></i>Disponible
+              </span>
+            </div>
+            
+            <!-- Badge de prix -->
+            <div class="vehicle-price-badge">
+              <span class="badge bg-primary price-badge">
+                <i class="bi bi-tag me-1"></i>{{ vehicule.categorie?.prixParJour | currency:'TND':'symbol':'1.2-2' }}
+              </span>
+            </div>
+          </div>
+
+          <!-- Corps de la carte -->
+          <div class="card-body p-4">
+            <!-- En-tête du véhicule -->
+            <div class="vehicle-header mb-3">
+              <div class="d-flex justify-content-between align-items-start">
+                <div class="flex-grow-1">
+                  <h5 class="card-title fw-bold mb-1 vehicle-title">
+                    {{ vehicule.marque }} {{ vehicule.modele }}
+                  </h5>
+                  <p class="text-muted small mb-0 vehicle-immat">
+                    <i class="bi bi-patch-check me-1"></i>{{ vehicule.immatriculation }}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Catégorie et prix -->
+            <div *ngIf="vehicule.categorie" class="vehicle-category mb-3">
+              <div class="d-flex align-items-center justify-content-between">
+                <span class="category-badge">
+                  <i class="bi bi-grid me-1"></i>{{ vehicule.categorie.nom }}
+                </span>
+                <div class="text-end">
+                  <span class="price-per-day fw-bold text-primary">
+                    {{ vehicule.categorie.prixParJour | currency:'TND':'symbol':'1.2-2' }}
+                  </span>
+                  <small class="d-block text-muted">par jour</small>
+                </div>
+              </div>
+            </div>
+
+            <!-- Caractéristiques principales -->
+            <div class="vehicle-features-grid">
+              <div class="row g-2">
+                <div class="col-6" *ngIf="vehicule.carburant">
+                  <div class="feature-item-modern">
+                    <i class="bi bi-fuel-pump feature-icon"></i>
+                    <span class="feature-text">{{ vehicule.carburant }}</span>
+                  </div>
+                </div>
+                <div class="col-6" *ngIf="vehicule.boiteVitesse">
+                  <div class="feature-item-modern">
+                    <i class="bi bi-gear feature-icon"></i>
+                    <span class="feature-text">{{ vehicule.boiteVitesse }}</span>
+                  </div>
+                </div>
+                <div class="col-6" *ngIf="vehicule.nombrePlaces">
+                  <div class="feature-item-modern">
+                    <i class="bi bi-people feature-icon"></i>
+                    <span class="feature-text">{{ vehicule.nombrePlaces }} places</span>
+                  </div>
+                </div>
+                <div class="col-6" *ngIf="vehicule.kilometrage">
+                  <div class="feature-item-modern">
+                    <i class="bi bi-speedometer2 feature-icon"></i>
+                    <span class="feature-text">{{ formatKilometrage(vehicule.kilometrage) }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Footer de la carte -->
+          <div class="card-footer bg-white border-top p-3">
+            <div class="d-grid gap-2">
+              <button class="btn btn-primary btn-lg w-100 vehicle-action-btn" 
+                      (click)="viewVehiculeDetails(vehicule.id); $event.stopPropagation()">
+                <i class="bi bi-info-circle me-2"></i>Voir les détails complets
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pagination Component -->
+    <app-pagination 
+      *ngIf="pagination"
+      [pagination]="pagination"
+      (pageChange)="onPageChange($event)"
+      (pageSizeChange)="onPageSizeChange($event)">
+    </app-pagination>
+  </div>
+</section>
+
+<!-- Section Services -->
+<section id="services" class="py-5 bg-light">
+  <div class="container">
+    <div class="text-center mb-5">
+      <h2 class="display-5 fw-bold mb-3">Nos Services</h2>
+      <p class="lead text-muted">Des solutions adaptées à tous vos besoins</p>
+    </div>
+    
+    <div class="row g-4">
+      <div class="col-md-4">
+        <div class="card border-0 shadow-sm h-100 text-center p-4">
+          <div class="mb-3">
+            <i class="bi bi-car-front text-primary" style="font-size: 3rem;"></i>
+          </div>
+          <h4>Location Simple</h4>
+          <p class="text-muted">Réservez facilement un véhicule pour vos déplacements personnels ou professionnels</p>
+        </div>
+      </div>
+      
+      <div class="col-md-4">
+        <div class="card border-0 shadow-sm h-100 text-center p-4">
+          <div class="mb-3">
+            <i class="bi bi-shield-check text-primary" style="font-size: 3rem;"></i>
+          </div>
+          <h4>Assurance Complète</h4>
+          <p class="text-muted">Conduisez en toute tranquillité avec notre couverture assurance complète</p>
+        </div>
+      </div>
+      
+      <div class="col-md-4">
+        <div class="card border-0 shadow-sm h-100 text-center p-4">
+          <div class="mb-3">
+            <i class="bi bi-headset text-primary" style="font-size: 3rem;"></i>
+          </div>
+          <h4>Support 24/7</h4>
+          <p class="text-muted">Notre équipe est disponible à tout moment pour vous assister</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer id="contact" class="bg-dark text-white py-4">
+  <div class="container">
+    <div class="row">
+      <div class="col-md-6">
+        <h5><i class="bi bi-car-front me-2"></i>Location Véhicules</h5>
+        <p class="mb-0">Votre partenaire de confiance pour toutes vos locations de véhicules</p>
+      </div>
+      <div class="col-md-6 text-md-end">
+        <p class="mb-0">© 2024 Location Véhicules. Tous droits réservés.</p>
+      </div>
+    </div>
+  </div>
+</footer>

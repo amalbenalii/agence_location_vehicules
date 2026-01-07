@@ -1,5 +1,5 @@
 export interface Vehicule {
-  id: number;
+  id?: number;
   marque: string;
   modele: string;
   immatriculation: string;
@@ -11,10 +11,18 @@ export interface Vehicule {
   statut: 'DISPONIBLE' | 'LOUE' | 'MAINTENANCE' | 'HORS_SERVICE';
   imageUrl?: string;
   categorie?: {
-    id: number;
+    id?: number;
     nom: string;
     description?: string;
     prixParJour: number;
     caracteristiques?: string;
+  };
+  agence?: {
+    id?: number;
+    nom: string;
+    adresse?: string;
+    ville?: string;
+    telephone?: string;
+    email?: string;
   };
 }

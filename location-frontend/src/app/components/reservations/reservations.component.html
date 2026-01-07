@@ -1,0 +1,241 @@
+<div class="container-fluid py-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold">
+      <i class="bi bi-calendar-check me-2 text-primary"></i>
+      {{ authService.isClient() ? 'Mes Réservations' : 'Toutes les Réservations' }}
+    </h2>
+    <button *ngIf="authService.isClient()" class="btn btn-primary btn-lg shadow-sm" routerLink="/add-reservation">
+      <i class="bi bi-plus-circle me-2"></i> Nouvelle Réservation
+    </button>
+  </div>
+
+  <div *ngIf="isLoading" class="text-center py-5">
+    <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+      <span class="visually-hidden">Chargement...</span>
+    </div>
+    <p class="mt-3 text-muted">Chargement des réservations...</p>
+  </div>
+
+  <div *ngIf="!isLoading">
+    <!-- Carte vide élégante -->
+    <div *ngIf="reservations.length === 0" class="text-center py-5">
+      <div class="card border-0 shadow-lg mx-auto" style="max-width: 600px; border-radius: 15px;">
+        <div class="card-body py-5 px-4">
+          <div class="mb-4">
+            <i class="bi bi-calendar-x fs-1 text-primary" style="font-size: 5rem !important;"></i>
+          </div>
+          <h4 class="card-title fw-bold mb-3">Aucune réservation</h4>
+          <p class="card-text text-muted mb-4">Il n'y a pas encore de réservation à afficher.</p>
+          <div *ngIf="authService.isClient()">
+            <a routerLink="/add-reservation" class="btn btn-primary btn-lg shadow-sm">
+              <i class="bi bi-plus-circle me-2"></i>Réserver un véhicule
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Cartes de réservations -->
+    <div *ngIf="reservations.length > 0" class="row g-4">
+      <div *ngFor="let reservation of reservations" class="col-12 col-md-6 col-lg-4">
+        <div class="card h-100 shadow-sm border-0 reservation-card" 
+             [class.border-warning]="reservation.statut === 'EN_ATTENTE'"
+             [class.border-success]="reservation.statut === 'CONFIRMEE'"
+             [class.border-info]="reservation.statut === 'EN_COURS'"
+             [class.border-secondary]="reservation.statut === 'TERMINEE'"
+             [class.border-danger]="reservation.statut === 'ANNULEE'"
+             style="border-radius: 15px; transition: transform 0.2s;"
+             (mouseenter)="onCardHover($event, true)"
+             (mouseleave)="onCardHover($event, false)">
+          
+          <!-- En-tête de la carte -->
+          <div class="card-header bg-gradient text-white d-flex justify-content-between align-items-center" 
+               [ngClass]="{
+                 'bg-warning': reservation.statut === 'EN_ATTENTE',
+                 'bg-success': reservation.statut === 'CONFIRMEE',
+                 'bg-info': reservation.statut === 'EN_COURS',
+                 'bg-secondary': reservation.statut === 'TERMINEE',
+                 'bg-danger': reservation.statut === 'ANNULEE'
+               }"
+               style="border-radius: 15px 15px 0 0;">
+            <div>
+              <h6 class="mb-0 fw-bold">Réservation #{{ reservation.id }}</h6>
+              <small class="opacity-75">{{ reservation.dateReservation | date:'dd/MM/yyyy HH:mm' }}</small>
+            </div>
+            <span class="badge bg-light text-dark px-3 py-2">
+              {{ reservation.statut }}
+            </span>
+          </div>
+
+          <div class="card-body">
+            <!-- Véhicule -->
+            <div class="mb-3">
+              <div class="d-flex align-items-center mb-2">
+                <i class="bi bi-car-front fs-4 text-primary me-2"></i>
+                <div>
+                  <h5 class="mb-0 fw-bold">{{ reservation.vehicule?.marque }} {{ reservation.vehicule?.modele }}</h5>
+                  <small class="text-muted">{{ reservation.vehicule?.immatriculation }}</small>
+                </div>
+              </div>
+              <div *ngIf="reservation.vehicule?.categorie" class="ms-5">
+                <span class="badge bg-secondary">{{ reservation.vehicule?.categorie?.nom }}</span>
+              </div>
+            </div>
+
+            <hr>
+
+            <!-- Dates -->
+            <div class="mb-3">
+              <div class="d-flex align-items-center mb-2">
+                <i class="bi bi-calendar-range text-primary me-2"></i>
+                <strong>Période de location</strong>
+              </div>
+              <div class="ms-4">
+                <div class="mb-1">
+                  <i class="bi bi-calendar-event me-1"></i>
+                  <strong>Début:</strong> {{ reservation.dateDebut | date:'dd/MM/yyyy' }}
+                </div>
+                <div>
+                  <i class="bi bi-calendar-check me-1"></i>
+                  <strong>Fin:</strong> {{ reservation.dateFin | date:'dd/MM/yyyy' }}
+                </div>
+              </div>
+            </div>
+
+            <hr>
+
+            <!-- Agences -->
+            <div class="mb-3">
+              <div class="d-flex align-items-center mb-2">
+                <i class="bi bi-geo-alt text-primary me-2"></i>
+                <strong>Agences</strong>
+              </div>
+              <div class="ms-4">
+                <div class="mb-1">
+                  <i class="bi bi-arrow-right-circle me-1"></i>
+                  <small><strong>Prise:</strong> {{ reservation.agencePriseEnCharge?.nom }}</small>
+                </div>
+                <div>
+                  <i class="bi bi-arrow-left-circle me-1"></i>
+                  <small><strong>Retour:</strong> {{ reservation.agenceRetour?.nom }}</small>
+                </div>
+              </div>
+            </div>
+
+            <hr>
+
+            <!-- Montant -->
+            <div class="mb-3">
+              <div class="d-flex justify-content-between align-items-center">
+                <span class="fw-bold">Montant total:</span>
+                <span class="fs-4 fw-bold text-primary">
+                  {{ reservation.montantTotal | currency:'TND':'symbol':'1.2-2' }}
+                </span>
+              </div>
+            </div>
+
+            <!-- Client (pour gestionnaire) -->
+            <div *ngIf="authService.isGestionnaire() && reservation.client" class="mb-3">
+              <hr>
+              <div class="d-flex align-items-center">
+                <i class="bi bi-person-circle text-primary me-2"></i>
+                <div>
+                  <strong>Client:</strong> {{ reservation.client.prenom }} {{ reservation.client.nom }}
+                </div>
+              </div>
+            </div>
+
+            <!-- Paiement -->
+            <div *ngIf="reservation.paiement" class="mb-3">
+              <hr>
+              <div class="d-flex justify-content-between align-items-center">
+                <span>
+                  <i class="bi bi-credit-card me-1"></i>
+                  <strong>Paiement:</strong>
+                  <span class="badge ms-2" 
+                        [ngClass]="{
+                          'bg-warning': reservation.paiement.statut === 'EN_ATTENTE',
+                          'bg-success': reservation.paiement.statut === 'VALIDE',
+                          'bg-danger': reservation.paiement.statut === 'ECHOUE'
+                        }">
+                    {{ reservation.paiement.statut }}
+                  </span>
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Actions -->
+          <div class="card-footer bg-light" style="border-radius: 0 0 15px 15px;">
+            <div class="d-flex gap-2 flex-wrap">
+              <!-- Actions pour les clients -->
+              <button 
+                *ngIf="authService.isClient() && (reservation.statut === 'EN_ATTENTE' || reservation.statut === 'CONFIRMEE')"
+                class="btn btn-warning btn-sm flex-fill"
+                [routerLink]="['/edit-reservation', reservation.id]"
+                title="Modifier"
+              >
+                <i class="bi bi-pencil-square me-1"></i> Modifier
+              </button>
+              
+              <button 
+                *ngIf="authService.isClient() && (reservation.statut === 'EN_ATTENTE' || reservation.statut === 'CONFIRMEE')"
+                class="btn btn-danger btn-sm flex-fill"
+                (click)="cancelReservation(reservation.id!)"
+                title="Annuler"
+              >
+                <i class="bi bi-x-circle me-1"></i> Annuler
+              </button>
+
+              <!-- Paiement pour les clients -->
+              <button 
+                *ngIf="authService.isClient() && reservation.statut === 'CONFIRMEE' && (!reservation.paiement || reservation.paiement?.statut === 'EN_ATTENTE' || reservation.paiement?.statut === 'ECHOUE')"
+                class="btn btn-success btn-sm flex-fill"
+                (click)="processPayment(reservation)"
+                title="Payer"
+              >
+                <i class="bi bi-credit-card me-1"></i> Payer
+              </button>
+              
+              <!-- Actions pour les gestionnaires -->
+              <div *ngIf="authService.isGestionnaire()" class="d-flex gap-2 w-100">
+                <button 
+                  *ngIf="reservation.statut === 'EN_ATTENTE'"
+                  class="btn btn-success btn-sm flex-fill"
+                  (click)="updateStatutReservation(reservation.id!, 'CONFIRMEE')"
+                  title="Confirmer"
+                >
+                  <i class="bi bi-check-circle me-1"></i> Confirmer
+                </button>
+                <button 
+                  *ngIf="reservation.statut === 'CONFIRMEE'"
+                  class="btn btn-info btn-sm flex-fill"
+                  (click)="updateStatutReservation(reservation.id!, 'EN_COURS')"
+                  title="Démarrer"
+                >
+                  <i class="bi bi-play-circle me-1"></i> Démarrer
+                </button>
+                <button 
+                  *ngIf="reservation.statut === 'EN_COURS'"
+                  class="btn btn-primary btn-sm flex-fill"
+                  (click)="updateStatutReservation(reservation.id!, 'TERMINEE')"
+                  title="Terminer"
+                >
+                  <i class="bi bi-check2-all me-1"></i> Terminer
+                </button>
+                <button 
+                  *ngIf="reservation.statut !== 'TERMINEE' && reservation.statut !== 'ANNULEE'"
+                  class="btn btn-danger btn-sm flex-fill"
+                  (click)="cancelReservation(reservation.id!)"
+                  title="Annuler"
+                >
+                  <i class="bi bi-x-circle me-1"></i> Annuler
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

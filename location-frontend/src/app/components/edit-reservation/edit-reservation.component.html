@@ -1,0 +1,110 @@
+<div class="container py-4">
+  <div class="card shadow-sm border-0">
+    <div class="card-header bg-primary text-white">
+      <h3 class="mb-0"><i class="bi bi-pencil-square me-2"></i>Modifier la Réservation</h3>
+    </div>
+    <div class="card-body">
+      <form [formGroup]="reservationForm" (ngSubmit)="onSubmit()">
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label for="vehiculeId" class="form-label">Véhicule</label>
+            <select
+              class="form-select"
+              id="vehiculeId"
+              formControlName="vehiculeId"
+              [class.is-invalid]="reservationForm.get('vehiculeId')?.invalid && reservationForm.get('vehiculeId')?.touched"
+            >
+              <option value="">Sélectionner un véhicule</option>
+              <option *ngFor="let vehicule of vehicules" [value]="vehicule.id">
+                {{ vehicule.marque }} {{ vehicule.modele }} - {{ vehicule.categorie?.nom }} 
+                ({{ vehicule.categorie?.prixParJour | currency:'TND':'symbol':'1.2-2' }}/jour)
+              </option>
+            </select>
+            <div class="invalid-feedback">Veuillez sélectionner un véhicule</div>
+          </div>
+
+          <div class="col-md-6 mb-3">
+            <label for="agencePriseEnChargeId" class="form-label">Agence de Prise en Charge</label>
+            <select
+              class="form-select"
+              id="agencePriseEnChargeId"
+              formControlName="agencePriseEnChargeId"
+              [class.is-invalid]="reservationForm.get('agencePriseEnChargeId')?.invalid && reservationForm.get('agencePriseEnChargeId')?.touched"
+            >
+              <option value="">Sélectionner une agence</option>
+              <option *ngFor="let agence of agences" [value]="agence.id">
+                {{ agence.nom }} - {{ agence.ville }}
+              </option>
+            </select>
+            <div class="invalid-feedback">Veuillez sélectionner une agence</div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label for="dateDebut" class="form-label">Date de Début</label>
+            <input
+              type="date"
+              class="form-control"
+              id="dateDebut"
+              formControlName="dateDebut"
+              [class.is-invalid]="reservationForm.get('dateDebut')?.invalid && reservationForm.get('dateDebut')?.touched"
+              [min]="getTodayDate()"
+            />
+            <div class="invalid-feedback">Veuillez sélectionner une date de début</div>
+          </div>
+
+          <div class="col-md-6 mb-3">
+            <label for="dateFin" class="form-label">Date de Fin</label>
+            <input
+              type="date"
+              class="form-control"
+              id="dateFin"
+              formControlName="dateFin"
+              [class.is-invalid]="reservationForm.get('dateFin')?.invalid && reservationForm.get('dateFin')?.touched"
+              [min]="reservationForm.get('dateDebut')?.value || getTodayDate()"
+            />
+            <div class="invalid-feedback">Veuillez sélectionner une date de fin</div>
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label for="agenceRetourId" class="form-label">Agence de Retour</label>
+          <select
+            class="form-select"
+            id="agenceRetourId"
+            formControlName="agenceRetourId"
+            [class.is-invalid]="reservationForm.get('agenceRetourId')?.invalid && reservationForm.get('agenceRetourId')?.touched"
+          >
+            <option value="">Sélectionner une agence</option>
+            <option *ngFor="let agence of agences" [value]="agence.id">
+              {{ agence.nom }} - {{ agence.ville }}
+            </option>
+          </select>
+          <div class="invalid-feedback">Veuillez sélectionner une agence</div>
+        </div>
+
+        <div class="alert alert-info" *ngIf="montantTotal > 0">
+          <strong><i class="bi bi-cash-coin me-2"></i>Montant total estimé : {{ montantTotal | currency:'TND':'symbol':'1.2-2' }}</strong>
+        </div>
+
+        <div class="alert alert-danger" *ngIf="errorMessage">
+          <i class="bi bi-exclamation-triangle me-2"></i>{{ errorMessage }}
+        </div>
+
+        <div class="d-flex gap-2">
+          <button type="submit" class="btn btn-primary" [disabled]="reservationForm.invalid || isLoading || errorMessage">
+            <span *ngIf="!isLoading"><i class="bi bi-check-circle me-2"></i>Enregistrer les modifications</span>
+            <span *ngIf="isLoading">
+              <span class="spinner-border spinner-border-sm me-2"></span>
+              Enregistrement...
+            </span>
+          </button>
+          <button type="button" class="btn btn-secondary" routerLink="/reservations">
+            <i class="bi bi-x-circle me-2"></i>Annuler
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

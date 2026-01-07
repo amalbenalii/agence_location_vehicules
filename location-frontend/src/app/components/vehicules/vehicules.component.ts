@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { VehiculeService } from '../../services/vehicule.service';
+import { AuthService } from '../../services/auth.service';
 import { Vehicule} from '../../models/vehicule';
 import {Categorievehicule} from "../../models/categorievehicule";
 
@@ -31,6 +32,7 @@ export class VehiculesComponent implements OnInit {
 
   constructor(
     private vehiculeService: VehiculeService,
+    public authService: AuthService,
     private router: Router
   ) {}
 
@@ -119,5 +121,12 @@ export class VehiculesComponent implements OnInit {
 
   getStatutClass(statut: string): string {
     return `badge-${statut.toLowerCase()}`;
+  }
+
+  onCardHover(event: MouseEvent, isEnter: boolean): void {
+    const target = event.currentTarget as HTMLElement;
+    if (target) {
+      target.style.transform = isEnter ? 'translateY(-5px)' : 'translateY(0)';
+    }
   }
 }

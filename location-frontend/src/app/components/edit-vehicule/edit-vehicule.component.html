@@ -113,24 +113,60 @@
           </div>
         </div>
 
-        <!-- Catégorie -->
-        <div class="mb-4">
-          <label class="form-label">Catégorie *</label>
-          <select class="form-select" [(ngModel)]="vehicule.categorie" name="categorie" required>
-            <option [ngValue]="null" disabled>Sélectionnez une catégorie</option>
-            <option *ngFor="let cat of categories" [ngValue]="cat">
-              {{ cat.nom }} - {{ cat.prixParJour | currency:'EUR' }}/jour
-            </option>
-          </select>
+        <!-- Image Upload -->
+        <div class="row">
+          <div class="col-12 mb-3">
+            <label class="form-label">Image du véhicule</label>
+            <app-image-upload
+              [currentImageUrl]="vehicule.imageUrl ? 'http://localhost:8090' + vehicule.imageUrl : undefined"
+              placeholder="Télécharger une nouvelle image pour le véhicule"
+              [maxSizeMB]="5"
+              (imageSelected)="onImageSelected($event)"
+              (imageRemoved)="onImageRemoved()">
+            </app-image-upload>
+            <small class="text-muted">
+              <i class="bi bi-info-circle me-1"></i>
+              Formats acceptés: JPG, PNG, GIF. Taille maximale: 5MB.
+            </small>
+          </div>
+        </div>
+
+        <!-- Catégorie et Agence -->
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label class="form-label">Catégorie *</label>
+            <select class="form-select" [(ngModel)]="vehicule.categorie" name="categorie" required>
+              <option [ngValue]="null" disabled>Sélectionnez une catégorie</option>
+              <option *ngFor="let cat of categories" [ngValue]="cat">
+                {{ cat.nom }} - {{ cat.prixParJour | currency:'TND':'symbol':'1.2-2' }}/jour
+              </option>
+            </select>
+          </div>
+
+          <div class="col-md-6 mb-3">
+            <label class="form-label">Agence *</label>
+            <select class="form-select" [(ngModel)]="vehicule.agence" name="agence" required>
+              <option [ngValue]="null" disabled>Sélectionnez une agence</option>
+              <option *ngFor="let agence of agences" [ngValue]="agence">
+                {{ agence.nom }} - {{ agence.ville }}
+              </option>
+            </select>
+          </div>
         </div>
 
         <!-- Boutons -->
         <div class="d-flex justify-content-end gap-2">
-          <button type="button" class="btn btn-secondary" (click)="cancel()">
+          <button type="button" class="btn btn-secondary" (click)="cancel()" [disabled]="isUploadingImage">
             <i class="bi bi-x-circle me-1"></i> Annuler
           </button>
-          <button type="submit" class="btn btn-warning" [disabled]="!isFormValid()">
-            <i class="bi bi-check-circle me-1"></i> Mettre à jour
+          <button type="submit" class="btn btn-warning" [disabled]="!isFormValid() || isUploadingImage">
+            <span *ngIf="!isUploadingImage">
+              <i class="bi bi-check-circle me-1"></i> Mettre à jour
+            </span>
+            <span *ngIf="isUploadingImage">
+              <span class="spinner-border spinner-border-sm me-2"></span>
+              Téléchargement...
+            </span>
           </button>
         </div>
       </form>

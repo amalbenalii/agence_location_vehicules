@@ -1,41 +1,47 @@
 package com.example.agence_location_vehicules.controller;
 
 import com.example.agence_location_vehicules.entities.CategorieVehicule;
-import com.example.agence_location_vehicules.repository.CategorieVehiculeRepository;
+import com.example.agence_location_vehicules.service.CategorieVehiculeService;
 import lombok.AllArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import jakarta.validation.Valid;
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/categories")
-@CrossOrigin(origins = "*")
+@CrossOrigin(origins = {"http://localhost:4200"}, allowCredentials = "true")
 @AllArgsConstructor
 public class CategorieVehiculeController {
 
-    private final CategorieVehiculeRepository categorieRepository;
+    private final CategorieVehiculeService categorieService;
 
     @GetMapping
-    public List<CategorieVehicule> getAll() {
-        return categorieRepository.findAll();
+    public ResponseEntity<List<CategorieVehicule>> getAllCategories() {
+        return ResponseEntity.ok(categorieService.getAllCategories());
     }
 
     @GetMapping("/{id}")
-    public CategorieVehicule getOne(@PathVariable Long id) {
-        return categorieRepository.findById(id).orElse(null);
+    public ResponseEntity<CategorieVehicule> getOne(@PathVariable Long id) {
+        CategorieVehicule categorie = categorieService.getCategorie(id);
+        return ResponseEntity.ok(categorie);
     }
 
     @PostMapping
-    public CategorieVehicule addCategorie(@RequestBody CategorieVehicule categorie) {
-        return categorieRepository.save(categorie);
+    public ResponseEntity<CategorieVehicule> addCategorie(@Valid @RequestBody CategorieVehicule categorie) {
+        CategorieVehicule created = categorieService.saveCategorie(categorie);
+        return ResponseEntity.ok(created);
     }
 
     @PutMapping
-    public CategorieVehicule updateCategorie(@RequestBody CategorieVehicule categorie) {
-        return categorieRepository.save(categorie);
+    public ResponseEntity<CategorieVehicule> updateCategorie(@Valid @RequestBody CategorieVehicule categorie) {
+        CategorieVehicule updated = categorieService.updateCategorie(categorie);
+        return ResponseEntity.ok(updated);
     }
 
     @DeleteMapping("/{id}")
-    public void deleteCategorie(@PathVariable Long id) {
-        categorieRepository.deleteById(id);
+    public ResponseEntity<Void> deleteCategorie(@PathVariable Long id) {
+        categorieService.deleteCategorieById(id);
+        return ResponseEntity.noContent().build();
     }
 }

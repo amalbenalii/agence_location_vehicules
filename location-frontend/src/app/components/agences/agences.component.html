@@ -1,0 +1,101 @@
+<div class="container-fluid py-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold">
+      <i class="bi bi-building me-2 text-primary"></i>Agences
+    </h2>
+    <button *ngIf="authService.isGestionnaire()" class="btn btn-primary btn-lg shadow-sm" routerLink="/add-agence">
+      <i class="bi bi-plus-circle me-2"></i> Nouvelle Agence
+    </button>
+  </div>
+
+  <div *ngIf="isLoading" class="text-center py-5">
+    <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+      <span class="visually-hidden">Chargement...</span>
+    </div>
+    <p class="mt-3 text-muted">Chargement des agences...</p>
+  </div>
+
+  <div *ngIf="!isLoading">
+    <!-- Carte vide élégante -->
+    <div *ngIf="agences.length === 0" class="text-center py-5">
+      <div class="card border-0 shadow-lg mx-auto" style="max-width: 600px; border-radius: 15px;">
+        <div class="card-body py-5 px-4">
+          <div class="mb-4">
+            <i class="bi bi-building fs-1 text-primary" style="font-size: 5rem !important;"></i>
+          </div>
+          <h4 class="card-title fw-bold mb-3">Aucune agence trouvée</h4>
+          <p class="card-text text-muted mb-4">Aucune agence n'a été enregistrée pour le moment.</p>
+          <div *ngIf="authService.isGestionnaire()">
+            <a routerLink="/add-agence" class="btn btn-primary btn-lg shadow-sm">
+              <i class="bi bi-plus-circle me-2"></i>Nouvelle agence
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Cartes d'agences -->
+    <div *ngIf="agences.length > 0" class="row g-4">
+      <div *ngFor="let agence of agences" class="col-12 col-md-6 col-lg-4">
+        <div class="card h-100 shadow-sm border-0 agence-card" 
+             style="border-radius: 15px; transition: transform 0.2s;"
+             (mouseenter)="onCardHover($event, true)"
+             (mouseleave)="onCardHover($event, false)">
+          
+          <div class="card-header bg-primary text-white" style="border-radius: 15px 15px 0 0;">
+            <h5 class="mb-0 fw-bold">
+              <i class="bi bi-building me-2"></i>{{ agence.nom }}
+            </h5>
+          </div>
+
+          <div class="card-body">
+            <div class="mb-3">
+              <div class="d-flex align-items-start mb-2">
+                <i class="bi bi-geo-alt-fill text-primary me-2 mt-1"></i>
+                <div>
+                  <strong>Adresse</strong>
+                  <p class="mb-0 text-muted">{{ agence.adresse }}</p>
+                  <p class="mb-0 text-muted" *ngIf="agence.ville">{{ agence.ville }}</p>
+                </div>
+              </div>
+            </div>
+
+            <hr>
+
+            <div class="mb-3" *ngIf="agence.telephone">
+              <div class="d-flex align-items-center">
+                <i class="bi bi-telephone text-primary me-2"></i>
+                <span>{{ agence.telephone }}</span>
+              </div>
+            </div>
+
+            <div class="mb-3" *ngIf="agence.email">
+              <div class="d-flex align-items-center">
+                <i class="bi bi-envelope text-primary me-2"></i>
+                <span>{{ agence.email }}</span>
+              </div>
+            </div>
+
+            <div *ngIf="agence.heureOuverture && agence.heureFermeture" class="mb-3">
+              <div class="d-flex align-items-center">
+                <i class="bi bi-clock text-primary me-2"></i>
+                <span>{{ agence.heureOuverture }} - {{ agence.heureFermeture }}</span>
+              </div>
+            </div>
+          </div>
+
+          <div *ngIf="authService.isGestionnaire()" class="card-footer bg-light" style="border-radius: 0 0 15px 15px;">
+            <div class="d-flex gap-2">
+              <button class="btn btn-warning btn-sm flex-fill" (click)="editAgence(agence.id)" title="Modifier">
+                <i class="bi bi-pencil-square me-1"></i> Modifier
+              </button>
+              <button class="btn btn-danger btn-sm flex-fill" (click)="deleteAgence(agence.id)" title="Supprimer">
+                <i class="bi bi-trash me-1"></i> Supprimer
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

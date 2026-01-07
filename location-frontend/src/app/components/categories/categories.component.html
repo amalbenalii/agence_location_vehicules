@@ -1,92 +1,107 @@
-<div class="container mt-4">
-  <!-- En-tête -->
+<div class="container-fluid py-4">
   <div class="d-flex justify-content-between align-items-center mb-4">
-    <div>
-      <h2 class="text-primary mb-1">
-        <i class="bi bi-tags me-2"></i>Liste des Catégories
-      </h2>
-      <p class="text-muted mb-0">Gérez les catégories de véhicules de votre flotte</p>
-    </div>
-    <button class="btn btn-primary" routerLink="/add-categorie">
-      <i class="bi bi-plus-circle me-1"></i> Ajouter une catégorie
+    <h2 class="fw-bold">
+      <i class="bi bi-tags me-2 text-primary"></i>{{ title }}
+    </h2>
+    <button *ngIf="authService.isGestionnaire()" class="btn btn-primary btn-lg shadow-sm" (click)="addCategorie()">
+      <i class="bi bi-plus-circle me-2"></i>Nouvelle Catégorie
     </button>
   </div>
 
-  <!-- Messages d'alerte -->
-  <div *ngIf="successMessage" class="alert alert-success alert-dismissible fade show" role="alert">
-    <i class="bi bi-check-circle me-2"></i>{{ successMessage }}
-    <button type="button" class="btn-close" (click)="successMessage = ''"></button>
+  <div *ngIf="loading" class="text-center py-5">
+    <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+      <span class="visually-hidden">Chargement...</span>
+    </div>
+    <p class="mt-3 text-muted">Chargement des catégories...</p>
   </div>
 
-  <div *ngIf="errorMessage" class="alert alert-danger alert-dismissible fade show" role="alert">
-    <i class="bi bi-exclamation-triangle me-2"></i>{{ errorMessage }}
-    <button type="button" class="btn-close" (click)="errorMessage = ''"></button>
+  <div *ngIf="error" class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert" style="border-radius: 10px;">
+    <i class="bi bi-exclamation-triangle me-2"></i>{{ error }}
+    <button type="button" class="btn-close" (click)="error = ''"></button>
   </div>
 
-  <!-- Liste des catégories -->
-  <div class="card">
-    <div class="card-header bg-dark text-white">
-      <h5 class="mb-0">Liste des Catégories ({{ categories.length }})</h5>
+  <div *ngIf="!loading && !error">
+    <!-- Carte vide élégante -->
+    <div *ngIf="categories.length === 0" class="text-center py-5">
+      <div class="card border-0 shadow-lg mx-auto" style="max-width: 600px; border-radius: 15px;">
+        <div class="card-body py-5 px-4">
+          <div class="mb-4">
+            <i class="bi bi-tags fs-1 text-primary" style="font-size: 5rem !important;"></i>
+          </div>
+          <h4 class="card-title fw-bold mb-3">Aucune catégorie</h4>
+          <p class="card-text text-muted mb-4">Créez des catégories pour organiser vos véhicules.</p>
+          <div *ngIf="authService.isGestionnaire()">
+            <button class="btn btn-primary btn-lg shadow-sm" (click)="addCategorie()">
+              <i class="bi bi-plus-circle me-2"></i>Nouvelle catégorie
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <!-- Loading -->
-    <div *ngIf="isLoading" class="card-body text-center py-5">
-      <div class="spinner-border text-primary" role="status"></div>
-      <p class="mt-3 text-muted">Chargement...</p>
-    </div>
+    <!-- Cartes de catégories -->
+    <div *ngIf="categories.length > 0" class="row g-4">
+      <div *ngFor="let categorie of categories" class="col-12 col-md-6 col-lg-4">
+        <div class="card h-100 shadow-sm border-0 categorie-card" 
+             style="border-radius: 15px; transition: transform 0.2s;"
+             (mouseenter)="onCardHover($event, true)"
+             (mouseleave)="onCardHover($event, false)">
+          
+          <div class="card-header bg-gradient text-white" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 15px 15px 0 0;">
+            <h5 class="mb-0 fw-bold">
+              <i class="bi bi-tag me-2"></i>{{ categorie.nom }}
+            </h5>
+          </div>
 
-    <!-- Tableau -->
-    <div *ngIf="!isLoading" class="table-responsive">
-      <table class="table table-hover mb-0">
-        <thead class="table-light">
-        <tr>
-          <th width="60">ID</th>
-          <th>Nom</th>
-          <th>Description</th>
-          <th>Caractéristiques</th>
-          <th width="120">Prix/Jour</th>
-          <th width="120" class="text-center">Actions</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr *ngFor="let cat of categories">
-          <td>{{ cat.id }}</td>
-          <td><strong>{{ cat.nom }}</strong></td>
-          <td>
-            <small class="text-muted" *ngIf="cat.description">
-              {{ cat.description }}
-            </small>
-            <small class="text-muted fst-italic" *ngIf="!cat.description">
-              Aucune description
-            </small>
-          </td>
-          <td>
-            <small class="text-muted" *ngIf="cat.caracteristiques">
-              {{ cat.caracteristiques }}
-            </small>
-            <small class="text-muted fst-italic" *ngIf="!cat.caracteristiques">
-              Aucune caractéristique
-            </small>
-          </td>
-          <td>
-            <span class="badge bg-success">{{ cat.prixParJour | currency:'EUR' }}</span>
-          </td>
-          <td class="text-center">
-            <button class="btn btn-sm btn-warning me-1" [routerLink]="['/edit-categorie', cat.id]">
-              <i class="bi bi-pencil"></i>
-            </button>
-            <button class="btn btn-sm btn-danger" (click)="deleteCategorie(cat.id, cat.nom)">
-              <i class="bi bi-trash"></i>
-            </button>
-          </td>
-        </tr>
-        <tr *ngIf="categories.length === 0 && !isLoading">
-          <td colspan="6" class="text-center py-4 text-muted">
-            Aucune catégorie trouvée
-          </td>
-        </tr>
-        </tbody>
-      </table>
+          <div class="card-body">
+            <div class="mb-4 text-center">
+              <div class="display-4 fw-bold text-primary mb-2">
+                {{ categorie.prixParJour | currency:'TND':'symbol':'1.2-2' }}
+              </div>
+              <small class="text-muted">par jour</small>
+            </div>
+
+            <hr>
+
+            <div class="mb-3" *ngIf="categorie.description">
+              <div class="d-flex align-items-start">
+                <i class="bi bi-info-circle text-primary me-2 mt-1"></i>
+                <div>
+                  <strong>Description</strong>
+                  <p class="mb-0 text-muted">{{ categorie.description }}</p>
+                </div>
+              </div>
+            </div>
+
+            <div *ngIf="!categorie.description" class="mb-3">
+              <p class="text-muted text-center mb-0">
+                <i class="bi bi-dash-circle me-1"></i>Aucune description
+              </p>
+            </div>
+
+            <div *ngIf="categorie.caracteristiques" class="mb-3">
+              <div class="d-flex align-items-start">
+                <i class="bi bi-list-check text-primary me-2 mt-1"></i>
+                <div>
+                  <strong>Caractéristiques</strong>
+                  <p class="mb-0 text-muted small">{{ categorie.caracteristiques }}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div *ngIf="authService.isGestionnaire()" class="card-footer bg-light" style="border-radius: 0 0 15px 15px;">
+            <div class="d-flex gap-2">
+              <button class="btn btn-warning btn-sm flex-fill" (click)="editCategorie(categorie.id!)" title="Modifier">
+                <i class="bi bi-pencil-square me-1"></i> Modifier
+              </button>
+              <button class="btn btn-danger btn-sm flex-fill" (click)="deleteCategorie(categorie.id!)" title="Supprimer">
+                <i class="bi bi-trash me-1"></i> Supprimer
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </div>

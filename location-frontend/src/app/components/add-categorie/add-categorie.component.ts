@@ -15,7 +15,6 @@ import {Categorievehicule} from "../../models/categorievehicule";
 })
 export class AddCategorieComponent {
   newCategorie: Categorievehicule = {
-    id: 0,
     nom: '',
     description: '',
     prixParJour: 0,
@@ -30,8 +29,7 @@ export class AddCategorieComponent {
   onSubmit(): void {
     if (this.isFormValid()) {
       // Préparer les données
-      const categorieToAdd = {
-        id: 0,
+      const categorieToAdd: any = {
         nom: this.newCategorie.nom.trim(),
         description: this.newCategorie.description?.trim() || '',
         prixParJour: this.newCategorie.prixParJour,

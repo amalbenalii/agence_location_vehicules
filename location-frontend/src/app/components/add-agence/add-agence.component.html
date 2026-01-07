@@ -1,0 +1,86 @@
+<div class="container mt-4">
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <div class="card">
+        <div class="card-header bg-primary text-white">
+          <h3 class="mb-0">
+            <i class="bi bi-geo-alt me-2"></i>
+            {{ title }}
+          </h3>
+        </div>
+        <div class="card-body">
+          <form (ngSubmit)="onSubmit()">
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label for="nom" class="form-label">Nom de l'agence *</label>
+                <input type="text" class="form-control" id="nom" name="nom" 
+                       [(ngModel)]="agence.nom" required>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label for="ville" class="form-label">Ville</label>
+                <input type="text" class="form-control" id="ville" name="ville" 
+                       [(ngModel)]="agence.ville">
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label for="adresse" class="form-label">Adresse *</label>
+              <textarea class="form-control" id="adresse" name="adresse" 
+                        [(ngModel)]="agence.adresse" rows="3" required></textarea>
+            </div>
+
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label for="telephone" class="form-label">Téléphone *</label>
+                <input type="tel" class="form-control" id="telephone" name="telephone" 
+                       [(ngModel)]="agence.telephone" required>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label for="email" class="form-label">Email</label>
+                <input type="email" class="form-control" id="email" name="email" 
+                       [(ngModel)]="agence.email">
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label for="heureOuverture" class="form-label">Heure d'ouverture</label>
+                <input type="time" class="form-control" id="heureOuverture" name="heureOuverture" 
+                       [(ngModel)]="agence.heureOuverture">
+              </div>
+              <div class="col-md-6 mb-3">
+                <label for="heureFermeture" class="form-label">Heure de fermeture</label>
+                <input type="time" class="form-control" id="heureFermeture" name="heureFermeture" 
+                       [(ngModel)]="agence.heureFermeture">
+              </div>
+            </div>
+
+            <div *ngIf="error" class="alert alert-danger">
+              {{ error }}
+            </div>
+
+            <div *ngIf="success" class="alert alert-success">
+              {{ success }}
+            </div>
+
+            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+              <button type="button" class="btn btn-secondary" (click)="cancel()">
+                <i class="bi bi-x-circle me-2"></i>Annuler
+              </button>
+              <button type="submit" class="btn btn-primary" [disabled]="loading">
+                <span *ngIf="!loading">
+                  <i class="bi bi-check-circle me-2"></i>
+                  {{ title.includes('Modifier') ? 'Mettre à jour' : 'Créer l\'agence' }}
+                </span>
+                <span *ngIf="loading">
+                  <span class="spinner-border spinner-border-sm me-2"></span>
+                  {{ title.includes('Modifier') ? 'Mise à jour en cours...' : 'Création en cours...' }}
+                </span>
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -3,6 +3,7 @@ package com.example.agence_location_vehicules.entities;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
+import java.util.List;
 
 @Entity
 @Table(name = "vehicules")
@@ -40,9 +41,18 @@ public class Vehicule {
     private StatutVehicule statut;
 
     private String imageUrl;
+    
     @ManyToOne
     @JoinColumn(name = "categorie_id")
     private CategorieVehicule categorie;
+
+    @ManyToOne
+    @JoinColumn(name = "agence_id", nullable = false)
+    private Agence agence;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "vehicule", fetch = FetchType.LAZY)
+    private List<Reservation> reservations;
 
     // Enumérations
     public enum Carburant {

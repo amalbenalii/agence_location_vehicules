@@ -1,5 +1,5 @@
 export interface Categorievehicule {
-  id: number;
+  id?: number;
   nom: string;
   description?: string;
   prixParJour: number;

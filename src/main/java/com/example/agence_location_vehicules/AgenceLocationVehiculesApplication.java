@@ -20,30 +20,59 @@ public class AgenceLocationVehiculesApplication {
                                    VehiculeRepository vehiculeRepo) {
         return args -> {
             // Création des catégories
-            CategorieVehicule catEconomique = CategorieVehicule.builder()
-                    .nom("Économique")
-                    .description("Véhicules compacts et économiques en carburant")
-                    .prixParJour(35.0)
-                    .caracteristiques("Climatisation, 4-5 places, consommation réduite")
-                    .build();
+            // Prévenir insertions en double : vérifier l'existence par nom
+            String nomEco = "Économique";
+            String nomBer = "Berline";
+            String nomSuv = "SUV";
 
-            CategorieVehicule catBerline = CategorieVehicule.builder()
-                    .nom("Berline")
-                    .description("Véhicules familiaux confortables")
-                    .prixParJour(50.0)
-                    .caracteristiques("Climatisation automatique, GPS, sièges cuir")
-                    .build();
+            CategorieVehicule catEconomique = categorieRepo.findByNom(nomEco);
+            if (catEconomique == null) {
+                catEconomique = CategorieVehicule.builder()
+                        .nom(nomEco)
+                        .description("Véhicules compacts et économiques en carburant")
+                        .prixParJour(35.0)
+                        .caracteristiques("Climatisation, 4-5 places, consommation réduite")
+                        .build();
+                try {
+                    categorieRepo.save(catEconomique);
+                } catch (org.springframework.dao.DataIntegrityViolationException e) {
+                    // Si une contrainte d'unicité survient (ex: encodage différent), on ignore
+                    System.err.println("Categorie existante ou erreur d'encodage pour: " + nomEco + " -> " + e.getMessage());
+                }
+                catEconomique = categorieRepo.findByNom(nomEco);
+            }
 
-            CategorieVehicule catSUV = CategorieVehicule.builder()
-                    .nom("SUV")
-                    .description("Véhicules tout-terrain familiaux")
-                    .prixParJour(70.0)
-                    .caracteristiques("4x4, grand espace, toit ouvrant")
-                    .build();
+            CategorieVehicule catBerline = categorieRepo.findByNom(nomBer);
+            if (catBerline == null) {
+                catBerline = CategorieVehicule.builder()
+                        .nom(nomBer)
+                        .description("Véhicules familiaux confortables")
+                        .prixParJour(50.0)
+                        .caracteristiques("Climatisation automatique, GPS, sièges cuir")
+                        .build();
+                try {
+                    categorieRepo.save(catBerline);
+                } catch (org.springframework.dao.DataIntegrityViolationException e) {
+                    System.err.println("Categorie existante ou erreur d'encodage pour: " + nomBer + " -> " + e.getMessage());
+                }
+                catBerline = categorieRepo.findByNom(nomBer);
+            }
 
-            categorieRepo.save(catEconomique);
-            categorieRepo.save(catBerline);
-            categorieRepo.save(catSUV);
+            CategorieVehicule catSUV = categorieRepo.findByNom(nomSuv);
+            if (catSUV == null) {
+                catSUV = CategorieVehicule.builder()
+                        .nom(nomSuv)
+                        .description("Véhicules tout-terrain familiaux")
+                        .prixParJour(70.0)
+                        .caracteristiques("4x4, grand espace, toit ouvrant")
+                        .build();
+                try {
+                    categorieRepo.save(catSUV);
+                } catch (org.springframework.dao.DataIntegrityViolationException e) {
+                    System.err.println("Categorie existante ou erreur d'encodage pour: " + nomSuv + " -> " + e.getMessage());
+                }
+                catSUV = categorieRepo.findByNom(nomSuv);
+            }
 
             // Création des véhicules
             vehiculeRepo.save(Vehicule.builder()

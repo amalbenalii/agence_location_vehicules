@@ -4,19 +4,77 @@ import { Observable } from 'rxjs';
 import { Vehicule } from '../models/vehicule';
 import {Categorievehicule} from "../models/categorievehicule";
 
+export interface PaginationResponse {
+  content: Vehicule[];
+  pageNumber: number;
+  pageSize: number;
+  totalElements: number;
+  totalPages: number;
+  first: boolean;
+  last: boolean;
+}
+
 @Injectable({
   providedIn: 'root'
 })
 export class VehiculeService {
   private apiUrl = 'http://localhost:8090/api';
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient) { 
+    // L'intercepteur HTTP ajoute automatiquement le token
+  }
 
   // ========== VÉHICULES (ProduitController) ==========
 
   // GET /api/vehicules
   getVehicules(): Observable<Vehicule[]> {
     return this.http.get<Vehicule[]>(`${this.apiUrl}/vehicules`);
+  }
+
+  // GET /api/vehicules/paginated
+  getVehiculesPaginated(page: number = 0, size: number = 6, sortBy: string = 'id', sortDir: string = 'asc'): Observable<PaginationResponse> {
+    const params = {
+      page: page.toString(),
+      size: size.toString(),
+      sortBy: sortBy,
+      sortDir: sortDir
+    };
+    return this.http.get<PaginationResponse>(`${this.apiUrl}/vehicules/paginated`, { params });
+  }
+
+  // GET /api/vehicules/available/paginated
+  getAvailableVehiculesPaginated(page: number = 0, size: number = 6, sortBy: string = 'id', sortDir: string = 'asc'): Observable<PaginationResponse> {
+    const params = {
+      page: page.toString(),
+      size: size.toString(),
+      sortBy: sortBy,
+      sortDir: sortDir
+    };
+    return this.http.get<PaginationResponse>(`${this.apiUrl}/vehicules/available/paginated`, { params });
+  }
+
+  // GET /api/vehicules/search/paginated
+  searchVehiculesPaginated(keyword: string, page: number = 0, size: number = 6, sortBy: string = 'id', sortDir: string = 'asc'): Observable<PaginationResponse> {
+    const params = {
+      keyword: keyword,
+      page: page.toString(),
+      size: size.toString(),
+      sortBy: sortBy,
+      sortDir: sortDir
+    };
+    return this.http.get<PaginationResponse>(`${this.apiUrl}/vehicules/search/paginated`, { params });
+  }
+
+  // GET /api/vehicules/available/search/paginated
+  searchAvailableVehiculesPaginated(keyword: string, page: number = 0, size: number = 6, sortBy: string = 'id', sortDir: string = 'asc'): Observable<PaginationResponse> {
+    const params = {
+      keyword: keyword,
+      page: page.toString(),
+      size: size.toString(),
+      sortBy: sortBy,
+      sortDir: sortDir
+    };
+    return this.http.get<PaginationResponse>(`${this.apiUrl}/vehicules/available/search/paginated`, { params });
   }
 
   // GET /api/vehicules/{id}
@@ -79,5 +137,19 @@ export class VehiculeService {
   // DELETE /api/categories/{id}
   deleteCategorie(id: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/categories/${id}`);
+  }
+
+  // ========== IMAGE UPLOAD ==========
+
+  // POST /api/vehicules/{id}/image
+  uploadVehiculeImage(id: number, file: File): Observable<{imageUrl: string}> {
+    const formData = new FormData();
+    formData.append('image', file);
+    return this.http.post<{imageUrl: string}>(`${this.apiUrl}/vehicules/${id}/image`, formData);
+  }
+
+  // DELETE /api/vehicules/{id}/image
+  deleteVehiculeImage(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/vehicules/${id}/image`);
   }
 }

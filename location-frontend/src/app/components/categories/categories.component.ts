@@ -2,85 +2,74 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { VehiculeService } from '../../services/vehicule.service';
-import {Categorievehicule} from "../../models/categorievehicule";
-
+import { CategorieService } from '../../services/categorie.service';
+import { AuthService } from '../../services/auth.service';
+import { CategorieVehicule } from '../../models/reservation.model';
 
 @Component({
   selector: 'app-categories',
   standalone: true,
   imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './categories.component.html',
-  styleUrls: ['./categories.component.scss']
+  styleUrls: ['./categories.component.css']
 })
 export class CategoriesComponent implements OnInit {
-  categories: Categorievehicule[] = [];
-
-  // Pour les messages
-  successMessage: string = '';
-  errorMessage: string = '';
-
-  // Pour le chargement
-  isLoading = false;
+  title = 'Gestion des Catégories';
+  categories: CategorieVehicule[] = [];
+  loading = false;
+  error = '';
 
   constructor(
-    private vehiculeService: VehiculeService,
-    private router: Router
+    private categorieService: CategorieService, 
+    public authService: AuthService,
+    public router: Router
   ) {}
 
   ngOnInit(): void {
     this.loadCategories();
   }
 
-  // Charger toutes les catégories
   loadCategories(): void {
-    this.isLoading = true;
-    this.vehiculeService.getCategories().subscribe({
+    this.loading = true;
+    this.categorieService.getAllCategories().subscribe({
       next: (data) => {
         this.categories = data;
-        this.isLoading = false;
+        this.loading = false;
       },
-      error: (error) => {
-        console.error('Erreur lors du chargement:', error);
-        this.showError('Erreur lors du chargement des catégories');
-        this.isLoading = false;
+      error: (err) => {
+        this.error = 'Erreur lors du chargement des catégories';
+        this.loading = false;
+        console.error('Error loading categories:', err);
       }
     });
   }
 
-  // Supprimer une catégorie
-  deleteCategorie(id: number, nom: string): void {
-    if (confirm(`Êtes-vous sûr de vouloir supprimer la catégorie "${nom}" ?`)) {
-      this.vehiculeService.deleteCategorie(id).subscribe({
+  editCategorie(id: number): void {
+    this.router.navigate(['/edit-categorie', id]);
+  }
+
+  deleteCategorie(id: number): void {
+    if (confirm('Êtes-vous sûr de vouloir supprimer cette catégorie ?')) {
+      this.categorieService.deleteCategorie(id).subscribe({
         next: () => {
-          this.categories = this.categories.filter(cat => cat.id !== id);
-          this.showSuccess('Catégorie supprimée avec succès !');
+          this.loadCategories();
         },
-        error: (error) => {
-          this.showError('Erreur lors de la suppression: ' + error.message);
+        error: (err) => {
+          this.error = 'Erreur lors de la suppression de la catégorie';
+          console.error('Error deleting categorie:', err);
         }
       });
     }
   }
 
-
-
-
-  // Afficher un message de succès
-  showSuccess(message: string): void {
-    this.successMessage = message;
-    setTimeout(() => {
-      this.successMessage = '';
-    }, 3000);
+  addCategorie(): void {
+    this.router.navigate(['/add-categorie']);
   }
 
-  // Afficher un message d'erreur
-  showError(message: string): void {
-    this.errorMessage = message;
-    setTimeout(() => {
-      this.errorMessage = '';
-    }, 5000);
+  onCardHover(event: MouseEvent, isEnter: boolean): void {
+    const target = event.currentTarget as HTMLElement;
+    if (target) {
+      target.style.transform = isEnter ? 'translateY(-5px)' : 'translateY(0)';
+    }
   }
-
-
 }

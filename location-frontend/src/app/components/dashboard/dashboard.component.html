@@ -1,0 +1,109 @@
+<div class="dashboard-container">
+  <div class="dashboard-header">
+    <h1>Tableau de bord</h1>
+    <p class="text-muted">Bienvenue, {{ currentUser?.prenom }} {{ currentUser?.nom }}</p>
+  </div>
+
+  <div class="welcome-section" *ngIf="authService.isClient()">
+    <h2>Espace Client</h2>
+    <p>Gérez vos réservations et consultez votre historique</p>
+    <div class="quick-actions">
+      <a routerLink="/reservations" class="action-btn">Mes Réservations</a>
+      <a routerLink="/add-reservation" class="action-btn">Nouvelle Réservation</a>
+      <a routerLink="/vehicules" class="action-btn">Catalogue Véhicules</a>
+      <a routerLink="/profile" class="action-btn">Mon Profil</a>
+    </div>
+  </div>
+
+  <div class="welcome-section" *ngIf="authService.isGestionnaire()">
+    <h2>Espace Gestion</h2>
+    <p>Gérez la flotte, les réservations et les agences</p>
+      <div class="quick-actions">
+      <a routerLink="/reservations" class="action-btn">Réservations</a>
+      <a routerLink="/vehicules" class="action-btn">Véhicules</a>
+      <a routerLink="/categories" class="action-btn">Catégories</a>
+      <a routerLink="/agences" class="action-btn">Agences</a>
+    </div>
+  </div>
+
+  <div *ngIf="isLoading" class="text-center py-5">
+    <div class="spinner-border" role="status">
+      <span class="visually-hidden">Chargement...</span>
+    </div>
+  </div>
+
+  <div class="stats-grid" *ngIf="!isLoading">
+    <div class="stat-card" *ngIf="authService.isClient()">
+      <div class="stat-icon bg-primary text-white mx-auto">
+        <i class="bi bi-calendar-check"></i>
+      </div>
+      <h3>Total Réservations</h3>
+      <div class="stat-number">{{ stats.totalReservations || 0 }}</div>
+      <div class="stat-label">Réservations</div>
+    </div>
+
+    <div class="stat-card" *ngIf="authService.isClient()">
+      <div class="stat-icon bg-warning text-white mx-auto">
+        <i class="bi bi-clock-history"></i>
+      </div>
+      <h3>En Attente</h3>
+      <div class="stat-number">{{ stats.reservationsEnAttente || 0 }}</div>
+      <div class="stat-label">Réservations</div>
+    </div>
+
+    <div class="stat-card" *ngIf="authService.isClient()">
+      <div class="stat-icon bg-success text-white mx-auto">
+        <i class="bi bi-check-circle"></i>
+      </div>
+      <h3>Confirmées</h3>
+      <div class="stat-number">{{ stats.reservationsConfirmees || 0 }}</div>
+      <div class="stat-label">Réservations</div>
+    </div>
+
+    <div class="stat-card" *ngIf="authService.isClient()">
+      <div class="stat-icon bg-info text-white mx-auto">
+        <i class="bi bi-car-front"></i>
+      </div>
+      <h3>En Cours</h3>
+      <div class="stat-number">{{ stats.reservationsEnCours || 0 }}</div>
+      <div class="stat-label">Réservations</div>
+    </div>
+
+    <!-- Stats pour gestionnaire -->
+    <div class="stat-card" *ngIf="authService.isGestionnaire()">
+      <div class="stat-icon bg-primary text-white mx-auto">
+        <i class="bi bi-calendar-check"></i>
+      </div>
+      <h3>Total Réservations</h3>
+      <div class="stat-number">{{ stats.totalReservations || 0 }}</div>
+      <div class="stat-label">Réservations</div>
+    </div>
+
+    <div class="stat-card" *ngIf="authService.isGestionnaire()">
+      <div class="stat-icon bg-success text-white mx-auto">
+        <i class="bi bi-car-front"></i>
+      </div>
+      <h3>Véhicules Disponibles</h3>
+      <div class="stat-number">{{ stats.vehiculesDisponibles || 0 }} / {{ stats.totalVehicules || 0 }}</div>
+      <div class="stat-label">Véhicules</div>
+    </div>
+
+      <div class="stat-card" *ngIf="authService.isGestionnaire()">
+      <div class="stat-icon bg-info text-white mx-auto">
+        <i class="bi bi-currency-dollar"></i>
+      </div>
+      <h3>Chiffre d'Affaires</h3>
+      <div class="stat-number">{{ (stats.chiffreAffairesTotal || 0) | currency:'TND':'symbol':'1.2-2' }}</div>
+      <div class="stat-label">Total</div>
+    </div>
+
+    <div class="stat-card" *ngIf="authService.isGestionnaire()">
+      <div class="stat-icon bg-warning text-white mx-auto">
+        <i class="bi bi-clock-history"></i>
+      </div>
+      <h3>Réservations En Cours</h3>
+      <div class="stat-number">{{ stats.reservationsEnCours || 0 }}</div>
+      <div class="stat-label">Réservations</div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,55 @@
+<div class="image-upload-container">
+  <div 
+    class="upload-area"
+    [class.dragging]="isDragging"
+    [class.has-image]="hasImage"
+    [class.disabled]="disabled"
+    (dragover)="onDragOver($event)"
+    (dragleave)="onDragLeave($event)"
+    (drop)="onDrop($event)">
+    
+    <!-- Image Preview -->
+    <div *ngIf="displayImage" class="image-preview">
+      <img [src]="displayImage" alt="Preview" class="preview-image">
+      <div class="image-overlay">
+        <button 
+          type="button" 
+          class="btn btn-danger btn-sm remove-btn"
+          (click)="removeImage()"
+          [disabled]="disabled">
+          <i class="bi bi-trash"></i>
+        </button>
+        <button 
+          type="button" 
+          class="btn btn-primary btn-sm change-btn"
+          (click)="fileInput.click()"
+          [disabled]="disabled">
+          <i class="bi bi-pencil"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Upload Placeholder -->
+    <div *ngIf="!displayImage" class="upload-placeholder">
+      <i class="bi bi-cloud-upload upload-icon"></i>
+      <p class="upload-text">{{ placeholder }}</p>
+      <p class="upload-hint">Glissez-déposez une image ou cliquez pour sélectionner</p>
+      <p class="upload-size">Taille max: {{ maxSizeMB }}MB</p>
+    </div>
+
+    <!-- Hidden File Input -->
+    <input 
+      type="file"
+      #fileInput
+      class="file-input"
+      [accept]="accept"
+      [disabled]="disabled"
+      (change)="onFileSelect($event)">
+  </div>
+
+  <!-- Error Message -->
+  <div *ngIf="errorMessage" class="alert alert-danger mt-2">
+    <i class="bi bi-exclamation-triangle me-2"></i>
+    {{ errorMessage }}
+  </div>
+</div>

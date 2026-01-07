@@ -1,0 +1,16 @@
+.min-vh-100 {
+  min-height: 100vh;
+}
+
+.bg-light {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background-attachment: fixed;
+}
+
+main {
+  background-color: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 15px;
+  margin: 20px;
+  min-height: calc(100vh - 40px);
+}

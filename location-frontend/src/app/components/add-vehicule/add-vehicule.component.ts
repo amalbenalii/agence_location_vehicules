@@ -3,18 +3,22 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { VehiculeService } from '../../services/vehicule.service';
+import { AgenceService } from '../../services/agence.service';
 import { Vehicule } from '../../models/vehicule';
-import {Categorievehicule} from "../../models/categorievehicule";
+import { Categorievehicule } from "../../models/categorievehicule";
+import { Agence } from '../../models/reservation.model';
+import { ImageUploadComponent } from '../image-upload/image-upload.component';
 
 @Component({
   selector: 'app-add-vehicule',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, ImageUploadComponent],
   templateUrl: './add-vehicule.component.html',
   styleUrls: ['./add-vehicule.component.scss']
 })
 export class AddVehiculeComponent implements OnInit {
   categories: Categorievehicule[] = [];
+  agences: Agence[] = [];
 
   vehicule: Vehicule = {
     id: 0,
@@ -30,6 +34,9 @@ export class AddVehiculeComponent implements OnInit {
   };
 
   selectedCategorieId: number | null = null;
+  selectedAgenceId: number | null = null;
+  selectedImageFile?: File;
+  isUploadingImage = false;
 
   carburants = ['ESSENCE', 'DIESEL', 'ELECTRIQUE', 'HYBRIDE'];
   boitesVitesse = ['MANUELLE', 'AUTOMATIQUE'];
@@ -37,11 +44,13 @@ export class AddVehiculeComponent implements OnInit {
 
   constructor(
     private vehiculeService: VehiculeService,
+    private agenceService: AgenceService,
     private router: Router
   ) {}
 
   ngOnInit(): void {
     this.loadCategories();
+    this.loadAgences();
   }
 
   loadCategories(): void {
@@ -57,6 +66,19 @@ export class AddVehiculeComponent implements OnInit {
     });
   }
 
+  loadAgences(): void {
+    this.agenceService.getAllAgences().subscribe({
+      next: (data: Agence[]) => {
+        this.agences = data;
+        console.log('Agences chargées:', data);
+      },
+      error: (error: any) => {
+        console.error('Erreur lors du chargement des agences:', error);
+        alert('Erreur lors du chargement des agences');
+      }
+    });
+  }
+
   onSubmit(): void {
     if (this.isFormValid()) {
       // Trouver la catégorie sélectionnée
@@ -66,9 +88,14 @@ export class AddVehiculeComponent implements OnInit {
         return;
       }
 
+      // Trouver l'agence sélectionnée
+      const selectedAgence = this.agences.find((ag: Agence) => ag.id === this.selectedAgenceId);
+      if (!selectedAgence) {
+        alert('Veuillez sélectionner une agence');
+        return;
+      }
+
       // Préparer les données du véhicule
-      // Le backend peut accepter soit l'objet complet, soit juste l'ID
-      // On envoie l'objet complet mais on s'assure qu'il a bien un ID
       const vehiculeToAdd: any = {
         marque: this.vehicule.marque.trim(),
         modele: this.vehicule.modele.trim(),
@@ -81,6 +108,9 @@ export class AddVehiculeComponent implements OnInit {
         statut: this.vehicule.statut,
         categorie: {
           id: selectedCategorie.id
+        },
+        agence: {
+          id: selectedAgence.id
         }
       };
       
@@ -89,8 +119,14 @@ export class AddVehiculeComponent implements OnInit {
       this.vehiculeService.addVehicule(vehiculeToAdd).subscribe({
         next: (createdVehicule) => {
           console.log('Véhicule créé:', createdVehicule);
-          alert('Véhicule ajouté avec succès');
-          this.router.navigate(['/vehicules']);
+          
+          // Upload image if selected
+          if (this.selectedImageFile && createdVehicule.id) {
+            this.uploadImage(createdVehicule.id);
+          } else {
+            alert('Véhicule ajouté avec succès');
+            this.router.navigate(['/vehicules']);
+          }
         },
         error: (error) => {
           console.error('Erreur complète:', error);
@@ -99,8 +135,36 @@ export class AddVehiculeComponent implements OnInit {
         }
       });
     } else {
-      alert('Veuillez remplir tous les champs obligatoires (Marque, Modèle, Immatriculation, Catégorie)');
+      alert('Veuillez remplir tous les champs obligatoires (Marque, Modèle, Immatriculation, Catégorie, Agence)');
     }
+  }
+
+  onImageSelected(file: File): void {
+    this.selectedImageFile = file;
+  }
+
+  onImageRemoved(): void {
+    this.selectedImageFile = undefined;
+  }
+
+  private uploadImage(vehiculeId: number): void {
+    if (!this.selectedImageFile) return;
+
+    this.isUploadingImage = true;
+    this.vehiculeService.uploadVehiculeImage(vehiculeId, this.selectedImageFile).subscribe({
+      next: (response) => {
+        console.log('Image uploaded:', response);
+        this.isUploadingImage = false;
+        alert('Véhicule ajouté avec succès (image téléchargée)');
+        this.router.navigate(['/vehicules']);
+      },
+      error: (error) => {
+        console.error('Error uploading image:', error);
+        this.isUploadingImage = false;
+        alert('Véhicule ajouté mais erreur lors du téléchargement de l\'image');
+        this.router.navigate(['/vehicules']);
+      }
+    });
   }
 
   isFormValid(): boolean {
@@ -108,7 +172,8 @@ export class AddVehiculeComponent implements OnInit {
       this.vehicule.marque &&
       this.vehicule.modele &&
       this.vehicule.immatriculation &&
-      this.selectedCategorieId
+      this.selectedCategorieId &&
+      this.selectedAgenceId
     );
   }
 

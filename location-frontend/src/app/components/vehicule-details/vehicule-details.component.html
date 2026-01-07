@@ -1,0 +1,190 @@
+<div class="container py-4">
+  <div *ngIf="isLoading" class="text-center py-5">
+    <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+      <span class="visually-hidden">Chargement...</span>
+    </div>
+  </div>
+
+  <div *ngIf="!isLoading && vehicule">
+    <!-- Bouton retour -->
+    <button class="btn btn-outline-secondary mb-4" (click)="goBack()">
+      <i class="bi bi-arrow-left me-2"></i>Retour
+    </button>
+
+    <div class="row g-4">
+      <!-- Image et actions -->
+      <div class="col-lg-6">
+        <div class="card border-0 shadow-sm">
+          <div *ngIf="vehicule.imageUrl" 
+               class="card-img-top position-relative" 
+               [style.background-image]="'url(http://localhost:8090' + vehicule.imageUrl + ')'"
+               (error)="onImageError($event)"
+               style="height: 450px; background-size: cover; background-position: center; border-radius: 12px 12px 0 0;">
+            <div class="position-absolute top-0 end-0 m-3">
+              <span class="badge fs-6 px-3 py-2" 
+                    [ngClass]="{
+                      'bg-success': vehicule.statut === 'DISPONIBLE',
+                      'bg-warning': vehicule.statut === 'LOUE',
+                      'bg-danger': vehicule.statut === 'MAINTENANCE' || vehicule.statut === 'HORS_SERVICE'
+                    }">
+                {{ vehicule.statut }}
+              </span>
+            </div>
+          </div>
+          <div *ngIf="!vehicule.imageUrl" 
+               class="card-img-top bg-light d-flex align-items-center justify-content-center position-relative" 
+               style="height: 450px; border-radius: 12px 12px 0 0;">
+            <i class="bi bi-car-front text-muted" style="font-size: 8rem;"></i>
+            <div class="position-absolute top-0 end-0 m-3">
+              <span class="badge fs-6 px-3 py-2" 
+                    [ngClass]="{
+                      'bg-success': vehicule.statut === 'DISPONIBLE',
+                      'bg-warning': vehicule.statut === 'LOUE',
+                      'bg-danger': vehicule.statut === 'MAINTENANCE' || vehicule.statut === 'HORS_SERVICE'
+                    }">
+                {{ vehicule.statut }}
+              </span>
+            </div>
+          </div>
+          
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h2 class="mb-0">{{ vehicule.marque }} {{ vehicule.modele }}</h2>
+              <span class="badge" 
+                    [ngClass]="{
+                      'bg-success': vehicule.statut === 'DISPONIBLE',
+                      'bg-warning': vehicule.statut === 'LOUE',
+                      'bg-danger': vehicule.statut === 'MAINTENANCE' || vehicule.statut === 'HORS_SERVICE'
+                    }">
+                {{ vehicule.statut }}
+              </span>
+            </div>
+
+            <div *ngIf="vehicule.categorie" class="mb-4">
+              <h3 class="text-primary mb-2">
+                {{ vehicule.categorie.prixParJour | currency:'TND':'symbol':'1.2-2' }}
+                <small class="text-muted fs-6">/jour</small>
+              </h3>
+              <span class="badge bg-info fs-6">{{ vehicule.categorie.nom }}</span>
+            </div>
+
+            <!-- Bouton de réservation pour les clients -->
+            <div *ngIf="authService.isClient() && vehicule.statut === 'DISPONIBLE'" class="d-grid">
+              <button class="btn btn-primary btn-lg" (click)="reserveVehicule()">
+                <i class="bi bi-calendar-check me-2"></i>Réserver ce véhicule
+              </button>
+            </div>
+
+            <!-- Actions pour gestionnaires -->
+            <div *ngIf="authService.isGestionnaire()" class="d-grid gap-2">
+              <button class="btn btn-warning" [routerLink]="['/edit-vehicule', vehicule.id]">
+                <i class="bi bi-pencil-square me-2"></i>Modifier
+              </button>
+              <button class="btn btn-danger" (click)="deleteVehicule()" *ngIf="vehicule.id">
+                <i class="bi bi-trash me-2"></i>Supprimer
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Détails -->
+      <div class="col-lg-6">
+        <div class="card border-0 shadow-sm h-100">
+          <div class="card-header bg-primary text-white">
+            <h4 class="mb-0"><i class="bi bi-info-circle me-2"></i>Détails du véhicule</h4>
+          </div>
+          <div class="card-body">
+            <div class="row g-3">
+              <div class="col-12">
+                <div class="d-flex align-items-center mb-2">
+                  <i class="bi bi-123 text-primary me-2 fs-5"></i>
+                  <strong>Immatriculation:</strong>
+                </div>
+                <p class="ms-4 mb-0">{{ vehicule.immatriculation }}</p>
+              </div>
+
+              <div class="col-md-6" *ngIf="vehicule.carburant">
+                <div class="d-flex align-items-center mb-2">
+                  <i class="bi bi-fuel-pump text-primary me-2"></i>
+                  <strong>Carburant:</strong>
+                </div>
+                <p class="ms-4 mb-0">{{ vehicule.carburant }}</p>
+              </div>
+
+              <div class="col-md-6" *ngIf="vehicule.boiteVitesse">
+                <div class="d-flex align-items-center mb-2">
+                  <i class="bi bi-gear text-primary me-2"></i>
+                  <strong>Boîte de vitesse:</strong>
+                </div>
+                <p class="ms-4 mb-0">{{ vehicule.boiteVitesse }}</p>
+              </div>
+
+              <div class="col-md-6" *ngIf="vehicule.nombrePlaces">
+                <div class="d-flex align-items-center mb-2">
+                  <i class="bi bi-people text-primary me-2"></i>
+                  <strong>Nombre de places:</strong>
+                </div>
+                <p class="ms-4 mb-0">{{ vehicule.nombrePlaces }} places</p>
+              </div>
+
+              <div class="col-md-6" *ngIf="vehicule.kilometrage">
+                <div class="d-flex align-items-center mb-2">
+                  <i class="bi bi-speedometer2 text-primary me-2"></i>
+                  <strong>Kilométrage:</strong>
+                </div>
+                <p class="ms-4 mb-0">{{ vehicule.kilometrage | number }} km</p>
+              </div>
+
+              <div class="col-md-6" *ngIf="vehicule.couleur">
+                <div class="d-flex align-items-center mb-2">
+                  <i class="bi bi-palette text-primary me-2"></i>
+                  <strong>Couleur:</strong>
+                </div>
+                <p class="ms-4 mb-0">{{ vehicule.couleur }}</p>
+              </div>
+
+              <div class="col-12" *ngIf="vehicule.agence">
+                <div class="d-flex align-items-center mb-2">
+                  <i class="bi bi-building text-primary me-2"></i>
+                  <strong>Agence:</strong>
+                </div>
+                <div class="ms-4">
+                  <p class="mb-1 fw-bold">{{ vehicule.agence.nom }}</p>
+                  <p class="mb-0 text-muted small" *ngIf="vehicule.agence.adresse">
+                    <i class="bi bi-geo-alt me-1"></i>{{ vehicule.agence.adresse }}
+                  </p>
+                  <p class="mb-0 text-muted small" *ngIf="vehicule.agence.ville">
+                    {{ vehicule.agence.ville }}
+                  </p>
+                </div>
+              </div>
+
+              <div class="col-12" *ngIf="vehicule.categorie?.description">
+                <hr>
+                <div class="d-flex align-items-start mb-2">
+                  <i class="bi bi-info-circle text-primary me-2 mt-1"></i>
+                  <div>
+                    <strong>Description:</strong>
+                    <p class="mb-0 mt-2">{{ vehicule.categorie?.description }}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-12" *ngIf="vehicule.categorie?.caracteristiques">
+                <hr>
+                <div class="d-flex align-items-start mb-2">
+                  <i class="bi bi-list-check text-primary me-2 mt-1"></i>
+                  <div>
+                    <strong>Caractéristiques:</strong>
+                    <p class="mb-0 mt-2">{{ vehicule.categorie?.caracteristiques }}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
